@@ -1,41 +1,49 @@
 <?php
-
+ 
     session_start();
     if(isset($_SESSION["username"])){
         header("Location: index.php");
         exit();
     }
-
+ 
 $host= "localhost";
 $user= "root";
 $password= "";
 $db = "adminlogin";
-
+ 
 mysqli_report(MYSQLI_REPORT_STRICT);
 $errorMessage = "";
-
+$username = "";
+$password = "";
+ 
 $data = mysqli_connect($host, $user, $password, $db);
 if($data===false)
 {
     die("Connection cannot establish.");
 }
-
+ 
+ 
+ 
 if($_SERVER["REQUEST_METHOD"]=="POST")
 {
     $username = $_POST["username"];
     $password = $_POST["password"];
-
+ 
     $sql = "select * from admin where username= '".$username."' AND password= '".$password."' ";
-
+ 
     $result = mysqli_query($data, $sql);
-    $row = mysqli_fetch_array($result);
-
-
-    if($row["username"] === $username && $row["password"] === $password){
-        $_SESSION["username"] = $username;
-        header("location:index.php");
+    if ($result) {
+        $row = mysqli_fetch_array($result); // check if null or not
+        if($row && $row["username"] === $username && $row["password"] === $password)
+        {
+            $_SESSION["username"] = $username;
+            header("location:index.php");
+            exit; // stop script execution after redirecting
+        } else {
+            $errorMessage = "Invalid Login.";
+        }
     } else {
-        $errorMessage = "Invalid Login.".$data->error;
+        $errorMessage = "Error executing query: ".$data->error;
     }
     // if($row["logintype"]==="admin")
     // {
@@ -52,7 +60,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
     //     $errorMessage = "Invalid Login. " . $data->error;
     // }
 }
-
+ 
 ?>
 
 
